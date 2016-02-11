@@ -25,6 +25,7 @@ class Drone:
 		return str(self.pos)+"\n"+str(self.items)
 
 
+
 class Ware:
 	def __init__(self,pos,nb_prod_type):
 		self.pos = pos
@@ -174,9 +175,37 @@ class cWait:
 
 r = Reader()
 r.read("busy_day.in")
-print "----------------------------------------"
-print r.wares[0]
 
 
 com = cWait(0,10)
 com.write()
+
+
+
+#return [133, (75, 180)]
+# [dist, ware.pos]
+def findWare(_drone, _wares):
+	dis = 2000000
+	ware = _wares[0].pos
+	for i in _wares:
+		res = dist(_drone, i.pos) 
+		if res < dis:
+			dis = res
+			ware = i
+	idWare = findWareInList(_wares, ware)
+	ret = [idWare, dis, ware.pos]
+	return ret
+
+
+def findWareInList(_wares, _ware):
+	idx = 0
+	for i in _wares:
+		if i.pos == _ware.pos:
+			return idx
+		idx += 1
+
+print "---------------"
+print findWare([15,300], r.wares)
+
+
+def charge(_ware)
