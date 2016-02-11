@@ -26,6 +26,14 @@ class Drone:
 		cost += 1
 		return cost
 
+	def deliver(target,order,type,nb):
+		cost = dist(target.pos,self.pos)
+		if !order.get(type,nb):
+			print "############ error load ",self.id,self.ware,self.type,self.nb
+		cost += 1
+		return cost
+
+
 	def __str__(self):
 		return str(self.id)+"\n"+str(self.pos)+"\n"+str(self.items)
 
@@ -37,16 +45,39 @@ class Ware:
 		self.pos = pos
 		self.items = nb_prod_type
 
+	def release(self,type,nb):
+		if self.items[type]<nb:
+			return False
+		self.items[type]-=nb
+		return True
 
 	def __str__(self):
 		return str(self.id)+"\n"+str(self.pos)+"\n"+str(self.items)
 	
 class Order:
-	def __init__(self,id,pos,nb_items,types):
+	def __init__(self,id,pos,nb_items,types,nb_types):
 		self.id = id
 		self.pos = pos
-		self.nb_items = nb_items
-		self.types = types
+		#self.nb_items = nb_items
+		#self.types = types
+		self.items = []
+		for i in range(nb_items):
+			self.items.append(0)
+		for i in types:
+			self.items[i] += 1
+
+
+	def get(self,type,nb):
+		if self.items[type] < nb:
+			return False
+		self.items[type]-=1
+		return True
+
+	def isFinished(self):
+		s = 0
+		for i in self.items:
+			s += i
+		return s==0
 
 	def __str__(self):
 		return str(self.id)+"\n"+str(self.pos)+"\n"+str(self.nb_items)+"\n"+str(self.types)
