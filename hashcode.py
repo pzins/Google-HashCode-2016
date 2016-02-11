@@ -1,8 +1,3 @@
-
-
-
-
-
 class Reader:
 	def __init__(self):
 		self.nb_rows = 0
@@ -88,11 +83,46 @@ class Reader:
 				dico["types"].append(int(s))
 			self.orders.append(dico)
 
+file = open("solution.txt", "w")
 
 
+class cLoadUnload:
+	def __init__(self, _drone, _tag, _ware, _prod, _nb):
+		self.drone = _drone
+		self.tag = _tag
+		self.ware = _ware
+		self.prod = _prod
+		self.nb = _nb
+	def write(self):
+		st = str(self.drone) + " " + str(self.tag) + " " + str(self.ware) + " " + str(self.prod) +  "  " + str(self.nb)
+		file.write(st)
 
+class cDeliver:
+	def __init__(self, _drone, _order, _prod, _nb):
+		self.drone = _drone
+		self.order = _order
+		self.prod = _prod
+		self.nb  =_nb
+	def write(self):
+		st = str(self.drone) + " D " + str(self.order) + " " + str(self.prod) +  "  " + str(self.nb)
+		file.write(st)
+
+class cWait:
+	def __init__(self, _drone, _w):
+		self.drone = _drone
+		self.wait = _w
+	
+	def write(self):
+		st = str(self.drone) + " W " + str(self.wait)
+		file.write(st)	
+
+		
 
 r = Reader()
 r.read("busy_day.in")
 print "----------------------------------------"
 print r.wares[0]
+
+
+com = cWait(0,10)
+com.write()
