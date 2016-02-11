@@ -1,3 +1,49 @@
+
+import math
+
+
+def dist(a,b,c,d):
+	return math.ceil(math.sqrt((a-c)*(a-c)+(b-d)*(b-d)))
+
+def dist(a,b):
+	return math.ceil(math.sqrt((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])))
+
+
+
+class Drone:
+	def __init__(self,pos,nb_prod_type):
+		self.pos = pos
+		self.items = []
+		for i in range(nb_prod_type):
+			self.items.append(0)
+		pass
+
+	def load(ware,type,nb):
+		move_cost = dist(po)
+
+	def __str__(self):
+		return str(self.pos)+"\n"+str(self.items)
+
+
+class Ware:
+	def __init__(self,pos,nb_prod_type):
+		self.pos = pos
+		self.items = nb_prod_type
+
+
+	def __str__(self):
+		return str(self.pos)+"\n"+str(self.items)
+	
+class Order:
+	def __init__(self,pos,nb_items,types):
+		self.pos = pos
+		self.nb_items = nb_items
+		self.types = types
+
+	def __str__(self):
+		return str(self.pos)+"\n"+str(self.nb_items)+"\n"+str(self.types)
+
+
 class Reader:
 	def __init__(self):
 		self.nb_rows = 0
@@ -10,7 +56,8 @@ class Reader:
 		self.wares = []
 		self.nb_orders = 0
 		self.orders = []
-		pass
+		self.drones = []
+		
 
 	def read(self,name):
 		lines = []
@@ -30,58 +77,65 @@ class Reader:
 		self.max_turns 	= int(header[3])
 		self.max_load 	= int(header[4])
 
-		print self.nb_rows 
-		print self.nb_cols 
-		print self.nb_drones 	
-		print self.max_turns 	
-		print self.max_load 	
+		#print self.nb_rows 
+		#print self.nb_cols 
+		#print self.nb_drones 	
+		#print self.max_turns 	
+		#print self.max_load 	
 
 
 
 		self.nb_prod = int(linesStrip[1])
-		print self.nb_prod
+		#print self.nb_prod
 
 		prod_w_str = linesStrip[2].split()
 		for s in prod_w_str:
 			self.prod_w.append(int(s))
-		print self.prod_w
+		#print self.prod_w
 
 
 		self.nb_wares = int(linesStrip[3])
 		for i in range(self.nb_wares):
-			dico = {}
 			pos_str = linesStrip[4+2*i].split()
-			#print pos_str
-			dico["pos"] = (int(pos_str[0]),int(pos_str[1]))
-			dico["items"] = []
+			pos = (int(pos_str[0]),int(pos_str[1]))
+			items = []
 			items_str = linesStrip[4+2*i+1].split()
 			for s in items_str:
-				dico["items"].append(int(s))
+				items.append(int(s))
+			self.wares.append(Ware(pos,items))
 
-			self.wares.append(dico)
 
-
-		print self.wares
+		for x in self.wares:
+			print x
 
 		index = self.nb_wares*2+4
 		self.nb_orders = int(linesStrip[index])
 		print self.nb_orders
 		index +=1
 		for i in range(self.nb_orders):
-			dico = {}
 			pos_str = linesStrip[index].split()
 			index+=1
-			dico["pos"] = (int(pos_str[0]),int(pos_str[1]))
+			pos = (int(pos_str[0]),int(pos_str[1]))
 
-			dico["nb_items"] = int(linesStrip[index])
+			nb_items = int(linesStrip[index])
 			index +=1
 
-			dico["types"] = []
+			types = []
 			types_str = linesStrip[index].split()
 			index+=1
 			for s in types_str:
-				dico["types"].append(int(s))
-			self.orders.append(dico)
+				types.append(int(s))
+
+			self.orders.append(Order(pos,nb_items,types))
+
+
+
+		for x in self.orders:
+				print x
+
+
+
+
 
 file = open("solution.txt", "w")
 
