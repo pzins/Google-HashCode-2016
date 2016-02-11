@@ -46,13 +46,15 @@ class Drone:
 			print "############ error load wieght ",self.id,self.ware,self.type,self.nb
 		self.items[type] += nb
 		cost += 1
+		self.pos = ware.pos
 		return cost
 
-	def deliver(target,order,type,nb):
-		cost = dist(target.pos,self.pos)
+	def deliver(order,type,nb):
+		cost = dist(order.pos,self.pos)
 		if not order.get(type,nb):
 			print "############ error load ",self.id,self.ware,self.type,self.nb
 		cost += 1
+		self.pos = order.pos
 		return cost
 
 	def weight(self):
@@ -110,6 +112,13 @@ class Order:
 		for i in self.items:
 			s += i
 		return s==0
+
+	def next_need(self):
+		global nb_types
+		for i in range(nb_types):
+			if self.items[i] >0:
+				return i,self.items[i]
+
 
 	def __str__(self):
 		return str(self.id)+"\n"+str(self.pos)+"\n"+str(self.items)
@@ -215,6 +224,35 @@ class Reader:
 
 
 
+
+
+	def commander(self):
+		global nb_drones
+		drone_to_order = []
+		for i in range(nb_drones):
+			drone_to_order.append([])
+		di = 0
+		#print "nb_order ====",self.nb_orders
+		for i in range(self.nb_orders):
+			drone_to_order[di].append(i)
+			di += 1
+			if di == nb_drones:
+				di = 0
+		#print drone_to_order
+
+
+		for di in range(nb_drones):
+			drone = self.drones[di]
+			if self.orders[drone_to_order[di][0]].isFinished():
+				drone_to_order[di].pop()
+
+			type_need,nb_need = self.orders[drone_to_order[di][0]].next_need()
+
+			## find nearest ok ware
+			#drone.load()
+			#drone.deliver()
+
+
 file = open("solution.txt", "w")
 
 
@@ -253,9 +291,11 @@ class cWait:
 r = Reader()
 r.read("busy_day.in")
 
+r.commander()
 
-com = cWait(0,10)
-com.write()
+
+#com = cWait(0,10)
+#com.write()
 
 
 
@@ -281,8 +321,27 @@ def findWareInList(_wares, _ware):
 			return idx
 		idx += 1
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 print "---------------"
 print findWare([15,300], r.wares)
 
 
-def charge(_ware)
+
