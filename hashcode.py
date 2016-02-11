@@ -11,7 +11,8 @@ def dist(a,b):
 
 
 class Drone:
-	def __init__(self,pos,nb_prod_type):
+	def __init__(self,id,pos,nb_prod_type):
+		self.id = id
 		self.pos = pos
 		self.items = []
 		for i in range(nb_prod_type):
@@ -19,29 +20,36 @@ class Drone:
 		pass
 
 	def load(ware,type,nb):
-		move_cost = dist(po)
+		cost = dist(ware.pos,self.pos)
+		if !ware.release(type,nb):
+			print "############ error load ",self.id,self.ware,self.type,self.nb
+		cost += 1
+		return cost
 
 	def __str__(self):
-		return str(self.pos)+"\n"+str(self.items)
+		return str(self.id)+"\n"+str(self.pos)+"\n"+str(self.items)
 
 
 class Ware:
-	def __init__(self,pos,nb_prod_type):
+	def __init__(self,id,pos,nb_prod_type):
+		
+		self.id = id
 		self.pos = pos
 		self.items = nb_prod_type
 
 
 	def __str__(self):
-		return str(self.pos)+"\n"+str(self.items)
+		return str(self.id)+"\n"+str(self.pos)+"\n"+str(self.items)
 	
 class Order:
-	def __init__(self,pos,nb_items,types):
+	def __init__(self,id,pos,nb_items,types):
+		self.id = id
 		self.pos = pos
 		self.nb_items = nb_items
 		self.types = types
 
 	def __str__(self):
-		return str(self.pos)+"\n"+str(self.nb_items)+"\n"+str(self.types)
+		return str(self.id)+"\n"+str(self.pos)+"\n"+str(self.nb_items)+"\n"+str(self.types)
 
 
 class Reader:
