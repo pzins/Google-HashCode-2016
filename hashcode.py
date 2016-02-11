@@ -20,6 +20,20 @@ def dist(a,b):
 
 
 
+def findWare(_drone, _wares, _type, _nb):
+	dis = 2000000
+	ware = _wares[0].pos
+	isOk = False;
+	idx = 0;
+	for i in _wares:
+		res = dist(_drone.pos, i.pos) 
+		if res < dis and i.items[_type] >= _nb:
+			dis = res
+			ware = i
+			isOk = True
+		idx += 1
+	return idx
+
 
 
 
@@ -223,6 +237,7 @@ class Reader:
 			#print self.drones[i]
 
 
+		
 
 
 
@@ -247,7 +262,7 @@ class Reader:
 				drone_to_order[di].pop()
 
 			type_need,nb_need = self.orders[drone_to_order[di][0]].next_need()
-
+			
 			## find nearest ok ware
 			#drone.load()
 			#drone.deliver()
@@ -299,27 +314,8 @@ r.commander()
 
 
 
-#return [133, (75, 180)]
-# [dist, ware.pos]
-def findWare(_drone, _wares):
-	dis = 2000000
-	ware = _wares[0].pos
-	for i in _wares:
-		res = dist(_drone, i.pos) 
-		if res < dis:
-			dis = res
-			ware = i
-	idWare = findWareInList(_wares, ware)
-	ret = [idWare, dis, ware.pos]
-	return ret
 
-
-def findWareInList(_wares, _ware):
-	idx = 0
-	for i in _wares:
-		if i.pos == _ware.pos:
-			return idx
-		idx += 1
+# print findWare([15,300], r.wares)
 
 
 
@@ -341,7 +337,17 @@ def findWareInList(_wares, _ware):
 
 
 print "---------------"
-print findWare([15,300], r.wares)
+
+# print "-------++--------"
+# print r.orders[0]
+
+	# def start(self):
+	# 	cost = 0
+	# 	o = self.orders[0]
+	# 	d = self.drones[0]
+	# 	print d
 
 
-
+	# 	w = findWare(d, self.wares)
+	# 	d.pos = w[2]
+	# 	d.load(self.wares[w[0]]
