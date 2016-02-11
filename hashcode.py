@@ -11,6 +11,7 @@ nb_types = 0
 prod_w = []
 
 
+nb_cmd = 0
 
 def dist(a,b,c,d):
 	return math.ceil(math.sqrt((a-c)*(a-c)+(b-d)*(b-d)))
@@ -54,6 +55,8 @@ class Drone:
 	def load(self,ware,type,nb):
 		global prod_w
 		global max_load
+		global nb_cmd
+
 
 		cost = dist(ware.pos,self.pos)
 		if not ware.release(type,nb):
@@ -66,10 +69,13 @@ class Drone:
 
 		c = cLoadUnload(self.id,'L',ware.id,type,nb)
 		c.write()
+		nb_cmd += 1
 
 		return cost
 
 	def deliver(self,order,type,nb):
+		global nb_cmd
+
 		cost = dist(order.pos,self.pos)
 		if not order.get(type,nb):
 			print "############ error load ",self.id,self.ware,self.type,self.nb
@@ -78,6 +84,9 @@ class Drone:
 
 		c = cDeliver(self.id,order.id,type,nb)
 		c.write()
+
+		nb_cmd += 1
+
 		return cost
 
 	def weight(self):
@@ -283,7 +292,6 @@ class Reader:
 			drone.deliver(order,type_need,nb_need)
 
 
-file = open("solution.txt", "w")
 
 
 class cLoadUnload:
@@ -316,12 +324,21 @@ class cWait:
 		st = str(self.drone) + " W " + str(self.wait) + "\n"
 		file.write(st)	
 
+filename = "busy_day.in"
+filename = "mother_of_all_warehouses.in"
+filename = "redundancy.in"
 		
 
 r = Reader()
-r.read("busy_day.in")
+r.read(filename)
+#r.read("busy_day.in")
+
+
+file = open("solution_"+filename+".txt", "w")
 
 r.commander()
+
+
 
 
 #com = cWait(0,10)
