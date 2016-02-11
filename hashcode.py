@@ -24,6 +24,7 @@ def findWare(_drone, _wares, _type, _nb):
 	dis = 2000000
 	ware = _wares[0].pos
 	isOk = False;
+	ware_i = 0
 	idx = 0;
 	for i in _wares:
 		res = dist(_drone.pos, i.pos) 
@@ -31,8 +32,9 @@ def findWare(_drone, _wares, _type, _nb):
 			dis = res
 			ware = i
 			isOk = True
+			ware_i = idx
 		idx += 1
-	return idx
+	return ware_i
 
 
 
@@ -49,7 +51,7 @@ class Drone:
 			self.items.append(0)
 		pass
 
-	def load(ware,type,nb):
+	def load(self,ware,type,nb):
 		global prod_w
 		global max_load
 
@@ -61,20 +63,27 @@ class Drone:
 		self.items[type] += nb
 		cost += 1
 		self.pos = ware.pos
+
+		c = cLoadUnload(self.id,'L',ware.id,type,nb)
+		c.write()
+
 		return cost
 
-	def deliver(order,type,nb):
+	def deliver(self,order,type,nb):
 		cost = dist(order.pos,self.pos)
 		if not order.get(type,nb):
 			print "############ error load ",self.id,self.ware,self.type,self.nb
 		cost += 1
 		self.pos = order.pos
+
+		c = cDeliver(self.id,order.id,type,nb)
+		c.write()
 		return cost
 
 	def weight(self):
 		global nb_types
 		global prod_w
-
+		w = 0
 		for i in range(nb_types):
 			w += prod_w[i] * self.items[i]
 		return w
@@ -201,7 +210,7 @@ class Reader:
 				items.append(int(s))
 			self.wares.append(Ware(i,pos,items))
 
-
+		print "size of wares = = = =",str(len(self.wares))
 		#for x in self.wares:
 		#	print x
 
@@ -258,14 +267,20 @@ class Reader:
 
 		for di in range(nb_drones):
 			drone = self.drones[di]
-			if self.orders[drone_to_order[di][0]].isFinished():
-				drone_to_order[di].pop()
+			order = self.orders[drone_to_order[di][0]]
 
-			type_need,nb_need = self.orders[drone_to_order[di][0]].next_need()
-			
-			## find nearest ok ware
-			#drone.load()
-			#drone.deliver()
+			if order.isFinished():
+				drone_to_order[di].pop()
+				continue
+
+
+			type_need,nb_need = order.next_need()
+
+			ware_id = findWare(drone,self.wares,type_need,nb_need)
+			print ware_id
+			ware = self.wares[ware_id]
+			drone.load(ware,type_need,nb_need)
+			drone.deliver(order,type_need,nb_need)
 
 
 file = open("solution.txt", "w")
@@ -279,7 +294,7 @@ class cLoadUnload:
 		self.prod = _prod
 		self.nb = _nb
 	def write(self):
-		st = str(self.drone) + " " + str(self.tag) + " " + str(self.ware) + " " + str(self.prod) +  "  " + str(self.nb)
+		st = str(self.drone) + " " + str(self.tag) + " " + str(self.ware) + " " + str(self.prod) +  "  " + str(self.nb) + "\n"
 		file.write(st)
 
 class cDeliver:
@@ -289,7 +304,7 @@ class cDeliver:
 		self.prod = _prod
 		self.nb  =_nb
 	def write(self):
-		st = str(self.drone) + " D " + str(self.order) + " " + str(self.prod) +  "  " + str(self.nb)
+		st = str(self.drone) + " D " + str(self.order) + " " + str(self.prod) +  "  " + str(self.nb) + "\n"
 		file.write(st)
 
 class cWait:
@@ -298,7 +313,7 @@ class cWait:
 		self.wait = _w
 	
 	def write(self):
-		st = str(self.drone) + " W " + str(self.wait)
+		st = str(self.drone) + " W " + str(self.wait) + "\n"
 		file.write(st)	
 
 		
