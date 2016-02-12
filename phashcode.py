@@ -292,9 +292,11 @@ class Reader:
 		#repartition des X orders sur les Y drones
 		#drone_to_order: tab de liste d'order
 
-		for j in range(40):
+		for j in range(self.nb_orders):
 			for di in range(nb_drones):
 				drone = self.drones[di]
+				if(len(drone_to_order[di]) <= j):
+					continue
 				order = self.orders[drone_to_order[di][j]]
 
 				#si l'order est deja fini on enleve de la liste des order pr ce drone la
@@ -314,14 +316,23 @@ class Reader:
 					idx = 0
 					while nb_need < get:
 						war = self.wares[listWares[idx][0]]
-						print "======================"
 						get += war.giveMax(type_need)
-						drone.load(war,type_need,nb_need)
-						drone.deliver(order,type_need,nb_need)
+						if drone.weight() + nb_need*prod_w[type_need] > max_load:
+							for i in range(nb_need):
+								drone.load(war,type_need,1)
+								drone.deliver(order,type_need,1)
+						else:
+							drone.load(war,type_need,nb_need)
+							drone.deliver(order,type_need,nb_need)
 						idx += 1
 				else:
-					drone.load(ware,type_need,nb_need)
-					drone.deliver(order,type_need,nb_need)
+					if drone.weight() + nb_need*prod_w[type_need] > max_load:
+						for i in range(nb_need):
+							drone.load(ware,type_need,1)
+							drone.deliver(order,type_need,1)
+					else:
+						drone.load(ware,type_need,nb_need)
+						drone.deliver(order,type_need,nb_need)
 
 
 
@@ -369,7 +380,7 @@ r.read(filename)
 file = open("solution_"+filename+".txt", "w")
 
 r.commander()
-
+print "max load" + str(max_load) + "  " + str(prod_w[49])
 
 
 
