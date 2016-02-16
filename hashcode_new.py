@@ -1,4 +1,4 @@
-
+import copy
 import math
 
 nb_rows = 0
@@ -57,6 +57,9 @@ class Drone:
 		global weight
 		global max_load
 
+		if not self.isWeightOk(type, nb):
+			print "Problem weight"
+
 		if ware.release(type,nb):
 			self.items[type] += nb
 			self.pos = ware.pos
@@ -69,10 +72,10 @@ class Drone:
 		global max_load
 		self.items[type] += nb;
 		res = True
-		if self.weight > max_load:
+		if self.weight() > max_load:
 			res = False
 		self.items[type] -= nb;
-		return 
+		return res
 
 
 	def deliver(self,order,type,nb):
@@ -151,23 +154,81 @@ class Order:
 		global nb_prod
 		for i in range(nb_prod):
 			if self.items[i] >0:
-				return i,self.items[i]
+				if self.items[i]  * weight[i] <= max_load:
+					return i,self.items[i]
+				else:
+					return i, 1
 		return -1,-1
+
+	def nbProdNeeded(self):
+		res = 0
+		for i in items:
+			if i > 0:
+				res += 1
+		return res
 
 	def __str__(self):
 		return str(self.id)+"\n"+str(self.pos)+"\n"+str(self.items)
 
 
+#find closest couple drone-ware for _nb _prod
+#return [id_ware, dist_drone_ware, id_drone]
+def bestDrone(_prod, _nb):
+	drone_dist = []
+	for i in drones:
+		tmp = closerWare(i, _prod, _nb)
+		if len(tmp) != 0:
+			tmp = tmp[0]
+			tmp.append(i.id)
+			drone_dist.append(tmp)
+	drone_dist.sort(key=lambda x: x[1])
+	if len(drone_dist) > 0:
+		return drone_dist[0]
+	else:
+		return False
+
+
+def simulate():
+	stack_drones = copy.copy(drones)
+
+	for order in orders:
+		prod, nb = order.next_need()
+		while prod != -1:
+			if len(stack_drones) <= 0:
+				stack_drones = copy.copy(drones)
+			drone = stack_drones.pop(0)
+			ware = wares[closerWare(drone, prod, nb)[0][0]]
+			drone.load(ware, prod, nb)
+			drone.deliver(order, prod, nb)
+			prod, nb = order.next_need()
+				
+
+
+
 
 def start():
 	global nb_drones
-	prod, nb = orders[0].next_need()
-	while prod != -1:
-		ware = wares[closerWare(drones[0], prod, nb)[0][0]]
-		drones[0].load(ware, prod, nb)
-		drones[0].deliver(orders[0], prod, nb)
-		prod, nb = orders[0].next_need()
 
+	for j in range(nb_orders):
+		for i in range(nb_prod):
+			nb = orders[j].items[i]
+			if nb > 0:
+				if nb * weight[i] < max_load:
+			#		print "ORDERS :", j, "; PROD :", i, "; NB :", nb
+					res = bestDrone(i, nb)
+			#		print "WARE :", res[0], "; DIST :", res[1], "; DRONE :", res[2]
+					drone = drones[res[2]]
+					ware = wares[res[0]]
+					drone.load(wares[res[0]], i, nb)
+					drone.deliver(orders[j], i, nb)
+				else:
+					for it in range(nb):
+						res = bestDrone(i, 1)
+						drone = drones[res[2]]
+						ware = wares[res[0]]
+						drone.load(wares[res[0]], i, 1)
+						drone.deliver(orders[j], i, 1)
+		#raw_input()
 
 
 def writeLoad(_drone, _ware, _prod, _nb):
@@ -275,9 +336,9 @@ class Reader:
 			id = i
 			pos = wares[0].pos
 			drones.append(Drone(id,pos))
-filename = "busy_day.in"
 
 filename = "mother_of_all_warehouses.in"
+filename = "busy_day.in"
 filename = "redundancy.in"
 		
 
@@ -286,8 +347,8 @@ r.read(filename)
 
 
 file = open("solution_"+filename+".txt", "w")
-
-start()
+simulate()
+# start()
 
 
 
