@@ -64,7 +64,8 @@ class Drone:
 			self.items[type] += nb
 			self.pos = ware.pos
 			writeLoad(self.id, ware.id, type, nb)
-
+		else:
+			print "problem ware release"
 
 	#check if drone weight is OK if we give it nb more products type
 	def isWeightOk(self, type, nb):
@@ -120,6 +121,9 @@ class Ware:
 		self.items[type] = 0
 		return nb
 
+	def hasEnough(self, prod, nb):
+		return self.items[prod] >= nb
+
 	def __str__(self):
 		return str(self.id)+"\n"+str(self.pos)+"\n"+str(self.items)
 	
@@ -156,9 +160,22 @@ class Order:
 			if self.items[i] >0:
 				if self.items[i]  * weight[i] <= max_load:
 					return i,self.items[i]
+				elif self.items[i]-1  * weight[i] <= max_load:
+					return i, self.items[i]-1
 				else:
 					return i, 1
 		return -1,-1
+
+
+	def getNeedList(self, prod, nb):
+		returnMap = []
+		for i in range(nb_prod):
+			if self.items[i] > 0 and prod == i and nb < self.items[i]:
+				returnMap.append([i, self.items[i]-nb])
+			elif self.items[i] > 0 and prod != i:
+				returnMap.append([i, self.items[i]])
+		return returnMap
+
 
 	def nbProdNeeded(self):
 		res = 0
@@ -188,6 +205,30 @@ def bestDrone(_prod, _nb):
 		return False
 
 
+
+def getWare(pos, prod, nb):
+	listWaresOk = []
+	for w in wares:
+		if w.items[prod] >= nb:
+			listWaresOk.append([w.id, dist(pos, w.pos)])
+	listWaresOk.sort(key=lambda x: x[1])
+	return listWaresOk
+
+
+def bestCompletion(_weight, prods):
+	res = 10000
+	sol = [-1,-1]
+	for i in prods:
+		for j in range(1,i[1]+1):
+			tmp = max_load - _weight - weight[i[0]] * j
+			if tmp > 0 and tmp < res:
+				res = tmp
+				sol = [i[0], j]
+	return sol
+
+def bestCompletion2(_weight, prods):
+
+
 def simulate():
 	stack_drones = copy.copy(drones)
 
@@ -198,9 +239,73 @@ def simulate():
 				stack_drones = copy.copy(drones)
 			drone = stack_drones.pop(0)
 			ware = wares[closerWare(drone, prod, nb)[0][0]]
-			drone.load(ware, prod, nb)
-			drone.deliver(order, prod, nb)
+			
+			loadList = []
+			loadList.append([prod, nb, ware.id])
+			loadVal = nb * weight[prod]
+			nextProdList = order.getNeedList(prod, nb)
+			bestNext = bestCompletion(loadVal, nextProdList)
+			if bestNext[0] != -1:
+				loadList.append([bestNext[0], bestNext[1], getWare(ware.pos, bestNext[0], bestNext[1])[0][0]])
+			for p in nextProdList:
+				if loadVal + weight[p[0]] * p[1] <= max_load:
+					loadVal += weight[p[0]] * p[1]
+					loadList.append([p[0], p[1], getWare(ware.pos, p[0], p[1])[0][0]])
+
+			for l in loadList:
+				drone.load(wares[l[2]], l[0], l[1])
+
+			for l in loadList:
+				drone.deliver(order, l[0], l[1])
 			prod, nb = order.next_need()
+
+
+
+
+
+#BEST BEST BEST
+# def simulate():
+# 	stack_drones = copy.copy(drones)
+
+# 	for order in orders:
+# 		prod, nb = order.next_need()
+# 		while prod != -1:
+# 			if len(stack_drones) <= 0:
+# 				stack_drones = copy.copy(drones)
+# 			drone = stack_drones.pop(0)
+# 			ware = wares[closerWare(drone, prod, nb)[0][0]]
+			
+# 			loadList = []
+# 			loadList.append([prod, nb])
+# 			loadVal = nb * weight[prod]
+# 			nextProdList = order.getNeedList(prod, nb)
+# 			for p in nextProdList:
+# 				if loadVal + weight[p[0]] * p[1] <= max_load and ware.hasEnough(p[0], p[1]):
+# 					loadVal += weight[p[0]] * p[1]
+# 					loadList.append([p[0], p[1]])
+# 			for l in loadList:
+# 				drone.load(ware, l[0], l[1])
+
+# 			for l in loadList:
+# 				drone.deliver(order, l[0], l[1])
+# 			prod, nb = order.next_need()
+
+
+
+
+# def simulate():
+# 	stack_drones = copy.copy(drones)
+
+# 	for order in orders:
+# 		prod, nb = order.next_need()
+# 		while prod != -1:
+# 			if len(stack_drones) <= 0:
+# 				stack_drones = copy.copy(drones)
+# 			drone = stack_drones.pop(0)
+# 			ware = wares[closerWare(drone, prod, nb)[0][0]]
+# 			drone.load(ware, prod, nb)
+# 			drone.deliver(order, prod, nb)
+# 			prod, nb = order.next_need()
 				
 
 
