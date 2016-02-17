@@ -500,7 +500,7 @@ for w in wares:
 	w.sort_targets2()
 	w.validate_needs()
 	##print len(w.targets_used)
-	w.create_batches2()
+	w.create_batches()
 	nb_batches[index] = float(len(w.batches))
 	total_batches += nb_batches[index]
 	index+=1

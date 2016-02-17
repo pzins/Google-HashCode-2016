@@ -60,9 +60,9 @@ class Drone:
 
 		cost = dist(ware.pos,self.pos)
 		if not ware.release(type,nb):
-			print "############ error load ",self.id,self.ware,self.type,self.nb
+			print "############ error load ",self.id,ware,type,nb
 		if self.weight() + nb*prod_w[type] > max_load:
-			print "############ error load wieght ",self.id,self.ware,self.type,self.nb
+			print "############ error load wieght ",self.id,ware,type,nb
 		self.items[type] += nb
 		cost += 1
 		self.pos = ware.pos
@@ -78,7 +78,7 @@ class Drone:
 
 		cost = dist(order.pos,self.pos)
 		if not order.get(type,nb):
-			print "############ error load ",self.id,self.ware,self.type,self.nb
+			print "############ error load ",self.id,ware,type,nb
 		cost += 1
 		self.pos = order.pos
 
@@ -273,23 +273,26 @@ class Reader:
 				di = 0
 		#print drone_to_order
 
+		for j in  range(2000):
+			for di in range(nb_drones):
+				drone = self.drones[di]
+				temp = drone_to_order[di]
+				if len(temp)==0:
+					continue
+				order = self.orders[temp[0]]
 
-		for di in range(nb_drones):
-			drone = self.drones[di]
-			order = self.orders[drone_to_order[di][0]]
-
-			if order.isFinished():
-				drone_to_order[di].pop()
-				continue
+				if order.isFinished():
+					drone_to_order[di].pop()
+					continue
 
 
-			type_need,nb_need = order.next_need()
+				type_need,nb_need = order.next_need()
 
-			ware_id = findWare(drone,self.wares,type_need,nb_need)
-			print ware_id
-			ware = self.wares[ware_id]
-			drone.load(ware,type_need,nb_need)
-			drone.deliver(order,type_need,nb_need)
+				ware_id = findWare(drone,self.wares,type_need,nb_need)
+				print ware_id
+				ware = self.wares[ware_id]
+				drone.load(ware,type_need,nb_need)
+				drone.deliver(order,type_need,nb_need)
 
 
 
@@ -302,7 +305,7 @@ class cLoadUnload:
 		self.prod = _prod
 		self.nb = _nb
 	def write(self):
-		st = str(self.drone) + " " + str(self.tag) + " " + str(self.ware) + " " + str(self.prod) +  "  " + str(self.nb) + "\n"
+		st = str(self.drone) + " " + str(self.tag) + " " + str(self.ware) + " " + str(self.prod) +  " " + str(self.nb) + "\n"
 		file.write(st)
 
 class cDeliver:
@@ -312,7 +315,7 @@ class cDeliver:
 		self.prod = _prod
 		self.nb  =_nb
 	def write(self):
-		st = str(self.drone) + " D " + str(self.order) + " " + str(self.prod) +  "  " + str(self.nb) + "\n"
+		st = str(self.drone) + " D " + str(self.order) + " " + str(self.prod) +  " " + str(self.nb) + "\n"
 		file.write(st)
 
 class cWait:
@@ -325,9 +328,9 @@ class cWait:
 		file.write(st)	
 
 filename = "busy_day.in"
-filename = "mother_of_all_warehouses.in"
-filename = "redundancy.in"
-		
+#filename = "mother_of_all_warehouses.in"
+#filename = "redundancy.in"
+#		
 
 r = Reader()
 r.read(filename)
